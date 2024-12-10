@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reference Number System</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; background-color: #f4f4f9; }
+    body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; background-color: #f9f9f9; }
     .form-group { margin-bottom: 15px; }
     label { display: block; margin-bottom: 5px; }
-    input, button { width: 100%; padding: 10px; margin-bottom: 10px; }
+    input, button { padding: 10px; width: 100%; }
     button { cursor: pointer; }
     .result { margin-top: 20px; }
   </style>
@@ -18,32 +18,32 @@
 
   <h2>Generate Reference Number</h2>
   <div class="form-group">
-    <label for="country">Country:</label>
+    <label>Country:</label>
     <input type="text" id="country" placeholder="Enter country name">
   </div>
   <div class="form-group">
-    <label for="poc">POC (e.g., A):</label>
-    <input type="text" id="poc" placeholder="Enter POC">
+    <label>POC:</label>
+    <input type="text" id="poc" placeholder="Enter POC (e.g., A)">
   </div>
   <div class="form-group">
-    <label for="owner">Owner:</label>
+    <label>Owner:</label>
     <input type="text" id="owner" placeholder="Enter owner name">
   </div>
   <div class="form-group">
-    <label for="date">Date (DDMM):</label>
-    <input type="text" id="date" placeholder="Enter date as DDMM">
+    <label>Date (DDMM):</label>
+    <input type="text" id="date" placeholder="Enter date in DDMM format">
   </div>
-  <button onclick="generateRefNumber()">Generate & Save</button>
-  <p><strong>Generated Reference Number:</strong> <span id="generatedRef"></span></p>
+  <button onclick="generateReference()">Generate & Save</button>
+  <p>Generated Reference Number: <span id="generatedRef"></span></p>
 
   <h2>Decode Reference Number</h2>
   <div class="form-group">
-    <label for="refNumber">Reference Number:</label>
+    <label>Reference Number:</label>
     <input type="text" id="refNumber" placeholder="Enter reference number">
   </div>
-  <button onclick="decodeRefNumber()">Decode</button>
+  <button onclick="decodeReference()">Decode</button>
   <div class="result">
-    <p><strong>Decoded Data:</strong></p>
+    <p>Decoded Data:</p>
     <ul>
       <li>Country: <span id="decodedCountry"></span></li>
       <li>POC: <span id="decodedPoc"></span></li>
@@ -53,23 +53,18 @@
   </div>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbz6bxan_tlIlx_xn8KV0XlKhPYfSEG-u592EvIGvO6benMR823Yo8p5TcoMEK-uw5nNmg/exec"; // Replace with your script URL
+    // Replace with your Google Apps Script Web App URL
+    const scriptURL = "https://script.google.com/macros/s/AKfycbz6bxan_tlIlx_xn8KV0XlKhPYfSEG-u592EvIGvO6benMR823Yo8p5TcoMEK-uw5nNmg/exec";
 
-    function generateRefNumber() {
+    function generateReference() {
       const country = document.getElementById("country").value;
       const poc = document.getElementById("poc").value.toUpperCase();
       const owner = document.getElementById("owner").value;
       const date = document.getElementById("date").value;
 
       if (country && poc && owner && date) {
-        const data = {
-          action: "generate",
-          country: country,
-          poc: poc,
-          owner: owner,
-          date: date,
-          countryCode: country.substring(0, 2).toUpperCase(), // Example: 31 for first two letters
-        };
+        const countryCode = country.substring(0, 2).toUpperCase();
+        const data = { action: "generate", country, poc, owner, date, countryCode };
 
         fetch(scriptURL, {
           method: "POST",
@@ -85,18 +80,15 @@
             }
           });
       } else {
-        alert("Please fill all fields correctly!");
+        alert("Please fill out all fields!");
       }
     }
 
-    function decodeRefNumber() {
+    function decodeReference() {
       const refNumber = document.getElementById("refNumber").value;
 
       if (refNumber) {
-        const data = {
-          action: "decode",
-          referenceNumber: refNumber,
-        };
+        const data = { action: "decode", referenceNumber: refNumber };
 
         fetch(scriptURL, {
           method: "POST",
