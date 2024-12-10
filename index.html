@@ -4,112 +4,75 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reference Number System</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; background-color: #f9f9f9; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; }
-    input, button { padding: 10px; width: 100%; }
-    button { cursor: pointer; }
-    .result { margin-top: 20px; }
-  </style>
 </head>
 <body>
   <h1>Reference Number System</h1>
 
   <h2>Generate Reference Number</h2>
-  <div class="form-group">
-    <label>Country:</label>
-    <input type="text" id="country" placeholder="Enter country name">
-  </div>
-  <div class="form-group">
-    <label>POC:</label>
-    <input type="text" id="poc" placeholder="Enter POC (e.g., A)">
-  </div>
-  <div class="form-group">
-    <label>Owner:</label>
-    <input type="text" id="owner" placeholder="Enter owner name">
-  </div>
-  <div class="form-group">
-    <label>Date (DDMM):</label>
-    <input type="text" id="date" placeholder="Enter date in DDMM format">
-  </div>
-  <button onclick="generateReference()">Generate & Save</button>
-  <p>Generated Reference Number: <span id="generatedRef"></span></p>
+  <form id="generateForm">
+    <label>Country: <input type="text" id="country" required></label><br>
+    <label>POC: <input type="text" id="poc" required></label><br>
+    <label>Owner: <input type="text" id="owner" required></label><br>
+    <label>Date (DDMM): <input type="text" id="date" required></label><br>
+    <button type="submit">Generate</button>
+  </form>
+  <p id="generatedRef"></p>
 
   <h2>Decode Reference Number</h2>
-  <div class="form-group">
-    <label>Reference Number:</label>
-    <input type="text" id="refNumber" placeholder="Enter reference number">
-  </div>
-  <button onclick="decodeReference()">Decode</button>
-  <div class="result">
-    <p>Decoded Data:</p>
-    <ul>
-      <li>Country: <span id="decodedCountry"></span></li>
-      <li>POC: <span id="decodedPoc"></span></li>
-      <li>Owner: <span id="decodedOwner"></span></li>
-      <li>Date: <span id="decodedDate"></span></li>
-    </ul>
-  </div>
+  <form id="decodeForm">
+    <label>Reference Number: <input type="text" id="referenceNumber" required></label><br>
+    <button type="submit">Decode</button>
+  </form>
+  <p id="decodedData"></p>
 
   <script>
-    // Replace with your Google Apps Script Web App URL
-    const scriptURL = "https://script.google.com/macros/s/AKfycbz6bxan_tlIlx_xn8KV0XlKhPYfSEG-u592EvIGvO6benMR823Yo8p5TcoMEK-uw5nNmg/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwgR5s214wo_RozI9HZ1QOJd3ugm8SbtoQWxkSTfppshIkQQhn8leaqwXH_GtA52kJDYg/exec"; // Replace with your Google Apps Script Web App URL
 
-    function generateReference() {
+    document.getElementById("generateForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
       const country = document.getElementById("country").value;
-      const poc = document.getElementById("poc").value.toUpperCase();
+      const poc = document.getElementById("poc").value;
       const owner = document.getElementById("owner").value;
       const date = document.getElementById("date").value;
 
-      if (country && poc && owner && date) {
-        const countryCode = country.substring(0, 2).toUpperCase();
-        const data = { action: "generate", country, poc, owner, date, countryCode };
+      const data = { action: "generate", country, poc, owner, date };
 
-        fetch(scriptURL, {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: { "Content-Type": "application/json" },
-        })
-          .then((response) => response.json())
-          .then((json) => {
-            if (json.success) {
-              document.getElementById("generatedRef").textContent = json.referenceNumber;
-            } else {
-              alert("Error: " + json.error);
-            }
-          });
+      const response = await fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        document.getElementById("generatedRef").textContent = `Reference Number: ${result.referenceNumber}`;
       } else {
-        alert("Please fill out all fields!");
+        alert(`Error: ${result.error}`);
       }
-    }
+    });
 
-    function decodeReference() {
-      const refNumber = document.getElementById("refNumber").value;
+    document.getElementById("decodeForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const referenceNumber = document.getElementById("referenceNumber").value;
 
-      if (refNumber) {
-        const data = { action: "decode", referenceNumber: refNumber };
+      const data = { action: "decode", referenceNumber };
 
-        fetch(scriptURL, {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: { "Content-Type": "application/json" },
-        })
-          .then((response) => response.json())
-          .then((json) => {
-            if (json.success) {
-              document.getElementById("decodedCountry").textContent = json.decodedData.country;
-              document.getElementById("decodedPoc").textContent = json.decodedData.poc;
-              document.getElementById("decodedOwner").textContent = json.decodedData.owner;
-              document.getElementById("decodedDate").textContent = json.decodedData.date;
-            } else {
-              alert("Error: " + json.error);
-            }
-          });
+      const response = await fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        const { country, poc, owner, date } = result.decodedData;
+        document.getElementById(
+          "decodedData"
+        ).textContent = `Country: ${country}, POC: ${poc}, Owner: ${owner}, Date: ${date}`;
       } else {
-        alert("Please enter a reference number!");
+        alert(`Error: ${result.error}`);
       }
-    }
+    });
   </script>
 </body>
 </html>
