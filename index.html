@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference Number System</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; background-color: #f4f4f9; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; }
+    input, button { width: 100%; padding: 10px; margin-bottom: 10px; }
+    button { cursor: pointer; }
+    .result { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Reference Number System</h1>
+
+  <h2>Generate Reference Number</h2>
+  <div class="form-group">
+    <label for="country">Country:</label>
+    <input type="text" id="country" placeholder="Enter country name">
+  </div>
+  <div class="form-group">
+    <label for="poc">POC (e.g., A):</label>
+    <input type="text" id="poc" placeholder="Enter POC">
+  </div>
+  <div class="form-group">
+    <label for="owner">Owner:</label>
+    <input type="text" id="owner" placeholder="Enter owner name">
+  </div>
+  <div class="form-group">
+    <label for="date">Date (DDMM):</label>
+    <input type="text" id="date" placeholder="Enter date as DDMM">
+  </div>
+  <button onclick="generateRefNumber()">Generate & Save</button>
+  <p><strong>Generated Reference Number:</strong> <span id="generatedRef"></span></p>
+
+  <h2>Decode Reference Number</h2>
+  <div class="form-group">
+    <label for="refNumber">Reference Number:</label>
+    <input type="text" id="refNumber" placeholder="Enter reference number">
+  </div>
+  <button onclick="decodeRefNumber()">Decode</button>
+  <div class="result">
+    <p><strong>Decoded Data:</strong></p>
+    <ul>
+      <li>Country: <span id="decodedCountry"></span></li>
+      <li>POC: <span id="decodedPoc"></span></li>
+      <li>Owner: <span id="decodedOwner"></span></li>
+      <li>Date: <span id="decodedDate"></span></li>
+    </ul>
+  </div>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbz6bxan_tlIlx_xn8KV0XlKhPYfSEG-u592EvIGvO6benMR823Yo8p5TcoMEK-uw5nNmg/exec"; // Replace with your script URL
+
+    function generateRefNumber() {
+      const country = document.getElementById("country").value;
+      const poc = document.getElementById("poc").value.toUpperCase();
+      const owner = document.getElementById("owner").value;
+      const date = document.getElementById("date").value;
+
+      if (country && poc && owner && date) {
+        const data = {
+          action: "generate",
+          country: country,
+          poc: poc,
+          owner: owner,
+          date: date,
+          countryCode: country.substring(0, 2).toUpperCase(), // Example: 31 for first two letters
+        };
+
+        fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: { "Content-Type": "application/json" },
+        })
+          .then((response) => response.json())
+          .then((json) => {
+            if (json.success) {
+              document.getElementById("generatedRef").textContent = json.referenceNumber;
+            } else {
+              alert("Error: " + json.error);
+            }
+          });
+      } else {
+        alert("Please fill all fields correctly!");
+      }
+    }
+
+    function decodeRefNumber() {
+      const refNumber = document.getElementById("refNumber").value;
+
+      if (refNumber) {
+        const data = {
+          action: "decode",
+          referenceNumber: refNumber,
+        };
+
+        fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: { "Content-Type": "application/json" },
+        })
+          .then((response) => response.json())
+          .then((json) => {
+            if (json.success) {
+              document.getElementById("decodedCountry").textContent = json.decodedData.country;
+              document.getElementById("decodedPoc").textContent = json.decodedData.poc;
+              document.getElementById("decodedOwner").textContent = json.decodedData.owner;
+              document.getElementById("decodedDate").textContent = json.decodedData.date;
+            } else {
+              alert("Error: " + json.error);
+            }
+          });
+      } else {
+        alert("Please enter a reference number!");
+      }
+    }
+  </script>
+</body>
+</html>
